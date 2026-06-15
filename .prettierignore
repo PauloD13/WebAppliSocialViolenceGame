@@ -1,0 +1,14 @@
+# Ignorar pastas de build e dependências
+dist
+node_modules
+.git
+
+# Arquivos gerados
+*.min.js
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Arquivos de ambiente e configuração estática
+.env*

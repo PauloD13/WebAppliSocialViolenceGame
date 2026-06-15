@@ -1,0 +1,37 @@
+# Dependências
+/node_modules
+/.pnp
+.pnp.js
+
+# Diretório de Build do Vite
+/dist
+
+# Cobertura de Testes
+/coverage
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Variáveis de ambiente locais
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.tmp
+*.jardesc
+
+# Sistema Operacional / Outros
+.DS_Store
+Thumbs.db
+node_modules

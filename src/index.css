@@ -1,0 +1,361 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts já carregados no index.html */
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Outlined', sans-serif;
+}
+
+.material-symbols-outlined.fill-1 {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Base */
+body {
+  background-color: #f3fde9;
+  color: #151e12;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Font families */
+.font-headline {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.font-body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+/* Glow effects por categoria */
+.neon-glow-red {
+  box-shadow: 0 0 30px -5px rgba(255, 75, 75, 0.4);
+}
+.neon-glow-blue {
+  box-shadow: 0 0 30px -5px rgba(28, 176, 246, 0.4);
+}
+.neon-glow-gray {
+  box-shadow: 0 0 30px -5px rgba(75, 75, 75, 0.4);
+}
+.neon-glow-yellow {
+  box-shadow: 0 0 30px -5px rgba(255, 200, 0, 0.4);
+}
+.neon-glow-brown {
+  box-shadow: 0 0 30px -5px rgba(165, 96, 50, 0.4);
+}
+.neon-glow-orange {
+  box-shadow: 0 0 30px -5px rgba(255, 150, 0, 0.4);
+}
+.neon-glow-green {
+  box-shadow: 0 0 30px -5px rgba(88, 204, 2, 0.4);
+}
+
+/* Glassmorphism */
+.glass-nav {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(243, 253, 233, 0.8);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+/* Button press effects */
+.button-press {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.button-press-red {
+  box-shadow: 0 4px 0 0 #93000a;
+}
+.button-press-red:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #93000a;
+}
+
+.button-press-blue {
+  box-shadow: 0 4px 0 0 #1588bd;
+}
+.button-press-blue:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #1588bd;
+}
+
+.button-press-gray {
+  box-shadow: 0 4px 0 0 #2a2a2a;
+}
+.button-press-gray:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #2a2a2a;
+}
+
+.button-press-yellow {
+  box-shadow: 0 4px 0 0 #C29800;
+}
+.button-press-yellow:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #C29800;
+}
+
+.button-press-brown {
+  box-shadow: 0 4px 0 0 #854d28;
+}
+.button-press-brown:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #854d28;
+}
+
+.button-press-orange {
+  box-shadow: 0 4px 0 0 #D17B00;
+}
+.button-press-orange:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #D17B00;
+}
+
+.button-press-green {
+  box-shadow: 0 4px 0 0 #0b4f00;
+}
+.button-press-green:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #0b4f00;
+}
+
+/* Option card */
+.option-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.option-card:active {
+  transform: scale(0.98);
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.animate-shake {
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+@keyframes celebrate {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-celebrate {
+  animation: celebrate 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 1s linear infinite;
+}
+
+/* Tooltip arrow */
+.tooltip-arrow::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 8px 0;
+  border-style: solid;
+  border-color: white transparent transparent transparent;
+}
+
+/* Path line for journey */
+.path-line {
+  position: absolute;
+  width: 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #bccbb2,
+    #bccbb2 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  z-index: 0;
+}
+
+/* SVG path */
+.svg-path {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.svg-path path {
+  fill: none;
+  stroke: #bccbb2;
+  stroke-width: 4;
+  stroke-dasharray: 8 8;
+}
+
+/* Node shadows */
+.node-shadow-feminicide { 
+  box-shadow: 0 6px 0 0 #cc3c3c, 0 0 40px 10px rgba(255, 75, 75, 0.4); 
+}
+.node-shadow-bullying { 
+  box-shadow: 0 6px 0 0 #cc9f00, 0 0 40px 10px rgba(255, 200, 0, 0.4); 
+}
+.node-shadow-abuse { 
+  box-shadow: 0 6px 0 0 #cc7800, 0 0 40px 10px rgba(255, 150, 0, 0.4); 
+}
+.node-shadow-rights { 
+  box-shadow: 0 6px 0 0 #168dc5, 0 0 40px 10px rgba(28, 176, 246, 0.4); 
+}
+.node-shadow-racism { 
+  box-shadow: 0 6px 0 0 #2a2a2a, 0 0 40px 10px rgba(75, 75, 75, 0.4); 
+}
+.node-shadow-animal { 
+  box-shadow: 0 6px 0 0 #844c28, 0 0 40px 10px rgba(165, 96, 50, 0.4); 
+}
+
+/* Glows for context cards */
+.glow-feminicide {
+  box-shadow: 0 0 40px -10px rgba(255, 75, 75, 0.3);
+}
+.glow-blue {
+  box-shadow: 0 0 30px -5px rgba(28, 176, 246, 0.4);
+}
+.abuse-glow {
+  box-shadow: 0 0 40px -10px rgba(255, 150, 0, 0.4);
+}
+.glow-yellow {
+  box-shadow: 0 0 40px -10px rgba(255, 200, 0, 0.4);
+}
+.neon-glow-racism {
+  box-shadow: 0 0 30px 5px rgba(75, 75, 75, 0.15);
+}
+.animal-glow {
+  box-shadow: 0 0 40px -10px rgba(165, 96, 50, 0.4);
+}
+.glow-success {
+  box-shadow: 0 0 30px rgba(88, 204, 2, 0.2);
+}
+.glow-primary {
+  box-shadow: 0 0 30px -5px rgba(19, 110, 0, 0.2);
+}
+
+/* Glass variants */
+.glass-feminicide {
+  background: rgba(255, 75, 75, 0.08);
+  backdrop-filter: blur(8px);
+}
+.blue-glass {
+  background: rgba(28, 176, 246, 0.08);
+  backdrop-filter: blur(8px);
+}
+.orange-glass {
+  background: rgba(255, 150, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+.yellow-glass {
+  background: rgba(255, 200, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+.racism-glass {
+  background: rgba(75, 75, 75, 0.08);
+  backdrop-filter: blur(8px);
+}
+.brown-glass {
+  background: rgba(165, 96, 50, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+/* Active press */
+.active-press:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease-out;
+}
+
+/* Prize float */
+.prize-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Journey path */
+.journey-path::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 24px;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, #bccbb2 0, #bccbb2 8px, transparent 8px, transparent 16px);
+  z-index: 0;
+}
+
+/* Scroll hide */
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Article content */
+.article-content p {
+  margin-bottom: 1.5rem;
+}
+
+/* Confetti canvas */
+.confetti-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Selection */
+::selection {
+  background: rgba(255, 75, 75, 0.2);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f3fde9;
+}
+::-webkit-scrollbar-thumb {
+  background: #bccbb2;
+  border-radius: 3px;
+}

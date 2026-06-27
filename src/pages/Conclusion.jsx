@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useGame } from '../hooks/useGame.jsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useGame } from "../hooks/useGame.jsx";
 
 function Conclusion() {
   const navigate = useNavigate();
-  const { getCategoryStats, resetTrail } = useGame();
+  const { getCategoryStats, resetTrail, score, ranking, rankingStatus, user } = useGame();
   const stats = getCategoryStats();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const totalAttempts = stats.reduce((sum, s) => sum + (s.attempts || 0), 0);
   const totalErrors = stats.reduce((sum, s) => sum + (s.errors || 0), 0);
+  const completedCount = stats.filter((s) => s.completed).length;
+  const totalCategories = stats.length || 1;
 
   const handleReiniciar = () => setShowConfirm(true);
 
   const confirmReset = () => {
     resetTrail();
     setShowConfirm(false);
-    navigate('/trail');
+    navigate("/trail");
   };
 
   return (
@@ -26,52 +28,162 @@ function Conclusion() {
 
         <section className="text-center mt-4 mb-8 z-20">
           <div className="relative inline-block mb-4">
-            <div className="w-32 h-32 bg-[#2bcc00] rounded-full flex items-center justify-center" style={{ boxShadow: '0 0 30px rgba(88, 204, 2, 0.2)' }}>
-              <span className="material-symbols-outlined text-[64px] text-[#0b4f00]" style={{ fontVariationSettings: "'FILL' 1" }}>celebration</span>
+            <div
+              className="w-32 h-32 bg-[#2bcc00] rounded-full flex items-center justify-center"
+              style={{ boxShadow: "0 0 30px rgba(88, 204, 2, 0.2)" }}
+            >
+              <span
+                className="material-symbols-outlined text-[64px] text-[#0b4f00]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                celebration
+              </span>
             </div>
           </div>
-          <h1 className="font-headline text-[24px] leading-[32px] font-bold text-[#151e12] mb-2">Parabéns!</h1>
-          <p className="font-body text-[18px] leading-[28px] font-medium text-[#3d4b37] px-4">Você concluiu toda a jornada de conscientização com sucesso.</p>
+          <h1 className="font-headline text-[24px] leading-[32px] font-bold text-[#151e12] mb-2">
+            Parabéns!
+          </h1>
+          <p className="font-body text-[18px] leading-[28px] font-medium text-[#3d4b37] px-4">
+            Você concluiu toda a jornada de conscientização com sucesso.
+          </p>
         </section>
 
         <section className="w-full grid grid-cols-2 gap-4 mb-8 z-20">
           <div className="col-span-2 bg-white p-6 rounded-xl border-2 border-[#bccbb2] shadow-sm flex flex-col items-center">
-            <span className="text-[#3d4b37] font-headline text-[12px] font-bold uppercase mb-4">Progresso Geral</span>
+            <span className="text-[#3d4b37] font-headline text-[12px] font-bold uppercase mb-4">
+              Progresso Geral
+            </span>
             <div className="relative w-32 h-32 mb-2">
               <svg className="w-full h-full transform -rotate-90">
-                <circle className="text-[#e7f1dd]" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" strokeWidth="12"></circle>
-                <circle className="text-[#58CC02] transition-all duration-1000" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" strokeDasharray="351.8" strokeDashoffset="0" strokeWidth="12"></circle>
+                <circle
+                  className="text-[#e7f1dd]"
+                  cx="64"
+                  cy="64"
+                  fill="transparent"
+                  r="56"
+                  stroke="currentColor"
+                  strokeWidth="12"
+                ></circle>
+                <circle
+                  className="text-[#58CC02] transition-all duration-1000"
+                  cx="64"
+                  cy="64"
+                  fill="transparent"
+                  r="56"
+                  stroke="currentColor"
+                  strokeDasharray="351.8"
+                  strokeDashoffset="0"
+                  strokeWidth="12"
+                ></circle>
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-headline text-[28px] leading-[36px] font-bold text-[#151e12]">6/6</span>
+                <span className="font-headline text-[28px] leading-[36px] font-bold text-[#151e12]">
+                  {completedCount}/{totalCategories}
+                </span>
                 <span className="text-[10px] font-bold text-[#3d4b37] uppercase">Trilhas</span>
               </div>
             </div>
-            <p className="font-headline text-[16px] font-bold text-[#58CC02]">100% Concluído</p>
+            <p className="font-headline text-[16px] font-bold text-[#58CC02]">
+              {Math.round((completedCount / totalCategories) * 100)}% Concluído
+            </p>
           </div>
           <div className="bg-[#e7f1dd] p-4 rounded-xl border-2 border-[#bccbb2] flex flex-col items-start gap-1">
-            <span className="material-symbols-outlined text-[#136e00]" style={{ fontVariationSettings: "'FILL' 1" }}>history</span>
-            <span className="font-headline text-[28px] leading-[36px] font-bold text-[#151e12]">{totalAttempts}</span>
-            <span className="text-[12px] font-body text-[#3d4b37] leading-tight">Total de Tentativas</span>
-          </div>
-          <div className="bg-[#e7f1dd] p-4 rounded-xl border-2 border-[#bccbb2] flex flex-col items-start gap-1">
-            <span className="material-symbols-outlined text-[#1CB0F6]" style={{ fontVariationSettings: "'FILL' 1" }}>target</span>
-            <span className="font-headline text-[28px] leading-[36px] font-bold text-[#151e12]">
-              {totalAttempts > 0 ? Math.round(((totalAttempts - totalErrors) / totalAttempts) * 100) : 100}%
+            <span
+              className="material-symbols-outlined text-[#136e00]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              history
             </span>
-            <span className="text-[12px] font-body text-[#3d4b37] leading-tight">Precisão Global</span>
+            <span className="font-headline text-[28px] leading-[36px] font-bold text-[#151e12]">
+              {totalAttempts}
+            </span>
+            <span className="text-[12px] font-body text-[#3d4b37] leading-tight">
+              Total de Tentativas
+            </span>
+          </div>
+          <div className="bg-[#e7f1dd] p-4 rounded-xl border-2 border-[#bccbb2] flex flex-col items-start gap-1">
+            <span
+              className="material-symbols-outlined text-[#1CB0F6]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              target
+            </span>
+            <span className="font-headline text-[28px] leading-[36px] font-bold text-[#151e12]">
+              {totalAttempts > 0
+                ? Math.round(((totalAttempts - totalErrors) / totalAttempts) * 100)
+                : 100}
+              %
+            </span>
+            <span className="text-[12px] font-body text-[#3d4b37] leading-tight">
+              Precisão Global
+            </span>
           </div>
         </section>
 
-        <section className="w-full bg-white/60 backdrop-blur-sm p-6 rounded-xl border-2 border-[#2bcc00] mb-8 flex flex-col items-center gap-4 text-center z-20" style={{ boxShadow: '0 0 30px rgba(88, 204, 2, 0.2)' }}>
+        {ranking.length > 0 && (
+          <section className="w-full bg-white p-6 rounded-xl border-2 border-[#bccbb2] mb-8 z-20">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <span className="text-[#3d4b37] font-headline text-[12px] font-bold uppercase">
+                  Ranking
+                </span>
+                <h3 className="font-headline text-[18px] leading-[28px] font-bold text-[#151e12]">
+                  Tempo real
+                </h3>
+              </div>
+              <span className="text-[11px] font-headline font-bold uppercase text-[#6d7b65]">
+                {rankingStatus === "connected" ? "Online" : "Local"}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {ranking.slice(0, 5).map((entry, index) => (
+                <div
+                  key={`${entry.id}-${entry.nickname}`}
+                  className="flex items-center justify-between bg-[#e7f1dd] rounded-lg px-4 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-full bg-[#136e00] text-white flex items-center justify-center font-headline text-[12px] font-bold">
+                      {index + 1}
+                    </span>
+                    <span className="font-headline text-[14px] font-bold text-[#151e12]">
+                      {entry.nickname}
+                      {user?.nickname === entry.nickname ? " (você)" : ""}
+                    </span>
+                  </div>
+                  <span className="font-headline text-[14px] font-bold text-[#136e00]">
+                    {entry.score} pts
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-center text-[12px] text-[#6d7b65] font-body">
+              Sua pontuação atual: {score} pts
+            </p>
+          </section>
+        )}
+
+        <section
+          className="w-full bg-white/60 backdrop-blur-sm p-6 rounded-xl border-2 border-[#2bcc00] mb-8 flex flex-col items-center gap-4 text-center z-20"
+          style={{ boxShadow: "0 0 30px rgba(88, 204, 2, 0.2)" }}
+        >
           <div className="animate-float">
             <div className="w-24 h-24 bg-gradient-to-br from-[#79ff59] to-[#136e00] rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-              <span className="material-symbols-outlined text-[48px] text-white" style={{ fontVariationSettings: "'FILL' 1" }}>military_tech</span>
+              <span
+                className="material-symbols-outlined text-[48px] text-white"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                military_tech
+              </span>
             </div>
           </div>
           <div>
-            <h3 className="font-headline text-[18px] leading-[28px] font-bold text-[#151e12] mb-2">Seu Prêmio te Espera!</h3>
-            <p className="font-body text-[16px] leading-[24px] text-[#3d4b37]">Você desbloqueou um <b>Botton de Embaixador Lumina</b>. Retire-o agora no balcão de informações principal.</p>
+            <h3 className="font-headline text-[18px] leading-[28px] font-bold text-[#151e12] mb-2">
+              Seu Prêmio te Espera!
+            </h3>
+            <p className="font-body text-[16px] leading-[24px] text-[#3d4b37]">
+              Você desbloqueou um <b>Botton de Embaixador Lumina</b>. Retire-o agora no balcão de
+              informações principal.
+            </p>
           </div>
           <div className="bg-[#e7f1dd] p-3 rounded-lg border border-dashed border-[#136e00] flex items-center gap-2">
             <span className="material-symbols-outlined text-[#136e00]">location_on</span>
@@ -80,11 +192,17 @@ function Conclusion() {
         </section>
 
         <div className="w-full space-y-3 z-20">
-          <button onClick={() => navigate('/trail')} className="w-full py-4 bg-[#136e00] text-white font-headline text-[16px] font-bold tracking-wider uppercase rounded-xl border-b-[4px] border-[#0b4f00] shadow-md flex items-center justify-center gap-2">
+          <button
+            onClick={() => navigate("/trail")}
+            className="w-full py-4 bg-[#136e00] text-white font-headline text-[16px] font-bold tracking-wider uppercase rounded-xl border-b-[4px] border-[#0b4f00] shadow-md flex items-center justify-center gap-2"
+          >
             Voltar para a Trilha
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
-          <button onClick={handleReiniciar} className="w-full py-4 bg-[#dce6d2] text-[#136e00] font-headline text-[16px] font-bold tracking-wider uppercase rounded-xl border-2 border-[#bccbb2] shadow-sm flex items-center justify-center gap-2">
+          <button
+            onClick={handleReiniciar}
+            className="w-full py-4 bg-[#dce6d2] text-[#136e00] font-headline text-[16px] font-bold tracking-wider uppercase rounded-xl border-2 border-[#bccbb2] shadow-sm flex items-center justify-center gap-2"
+          >
             <span className="material-symbols-outlined">restart_alt</span>
             Reiniciar Trilha
           </button>
@@ -93,13 +211,30 @@ function Conclusion() {
 
       {showConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowConfirm(false)}></div>
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowConfirm(false)}
+          ></div>
           <div className="relative bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl">
-            <h3 className="font-headline text-[24px] leading-[32px] font-bold text-[#151e12] mb-3">Reiniciar Trilha?</h3>
-            <p className="text-[#3d4b37] font-body text-[16px] leading-[24px] mb-8">Todo o progresso será resetado, mas seu histórico de conclusões será preservado.</p>
+            <h3 className="font-headline text-[24px] leading-[32px] font-bold text-[#151e12] mb-3">
+              Reiniciar Trilha?
+            </h3>
+            <p className="text-[#3d4b37] font-body text-[16px] leading-[24px] mb-8">
+              Todo o progresso será resetado, mas seu histórico de conclusões será preservado.
+            </p>
             <div className="flex gap-3">
-              <button onClick={() => setShowConfirm(false)} className="flex-1 py-3 bg-[#e7f1dd] text-[#3d4b37] rounded-xl font-headline text-[14px] font-bold">Cancelar</button>
-              <button onClick={confirmReset} className="flex-1 py-3 bg-[#136e00] text-white rounded-xl font-headline text-[14px] font-bold">Confirmar</button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 bg-[#e7f1dd] text-[#3d4b37] rounded-xl font-headline text-[14px] font-bold"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmReset}
+                className="flex-1 py-3 bg-[#136e00] text-white rounded-xl font-headline text-[14px] font-bold"
+              >
+                Confirmar
+              </button>
             </div>
           </div>
         </div>

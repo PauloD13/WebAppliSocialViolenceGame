@@ -1,15 +1,15 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { GameProvider } from './hooks/useGame.jsx';
-import Entry from './pages/Entry.jsx';
-import Trail from './pages/Trail.jsx';
-import Context from './pages/Context.jsx';
-import Question from './pages/Question.jsx';
-import Feedback from './pages/Feedback.jsx';
-import Conclusion from './pages/Conclusion.jsx';
-import LearnMore from './pages/LearnMore.jsx';
-import About from './pages/About.jsx';
-import BottomNav from './components/BottomNav.jsx';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { GameProvider } from "./hooks/useGame.jsx";
+import Entry from "./pages/Entry.jsx";
+import Trail from "./pages/Trail.jsx";
+import Context from "./pages/Context.jsx";
+import Question from "./pages/Question.jsx";
+import Feedback from "./pages/Feedback.jsx";
+import Conclusion from "./pages/Conclusion.jsx";
+import LearnMore from "./pages/LearnMore.jsx";
+import About from "./pages/About.jsx";
+import BottomNav from "./components/BottomNav.jsx";
 
 function App() {
   return (

@@ -10,9 +10,9 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "prettier"
+    "plugin:prettier/recommended" // Integra o Prettier diretamente no ESLint
   ],
-  ignorePatterns: ["dist", ".eslintrc.cjs"],
+  ignorePatterns: ["dist", ".eslintrc.cjs", "node_modules"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaFeatures: {
@@ -21,11 +21,9 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module"
   },
-  plugins: ["react", "@typescript-eslint", "react-refresh"],
+  plugins: ["react", "@typescript-eslint", "react-refresh", "prettier"],
   rules: {
-    "indent": ["error", 2, { "SwitchCase": 1 }],
-    "quotes": ["error", "double"],
-    "semi": ["error", "always"],
+    "prettier/prettier": "error", // Avisa erros do Prettier como erros de compilação
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],

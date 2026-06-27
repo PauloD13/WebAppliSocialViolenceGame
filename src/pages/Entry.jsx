@@ -1,29 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useGame } from '../hooks/useGame.jsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useGame } from "../hooks/useGame.jsx";
 
 function Entry() {
   const navigate = useNavigate();
-  const { setNickname } = useGame();
-  const [nickname, setLocalNickname] = useState('');
+  const { setNickname, nicknameError, user } = useGame();
+  const [nickname, setLocalNickname] = useState(user?.nickname || "");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  const handleEnter = () => {
-    if (nickname.trim() === '') {
+  const handleEnter = async () => {
+    if (nickname.trim() === "") {
       setError(true);
+      setMessage("Informe um apelido para começar.");
       setTimeout(() => setError(false), 500);
       return;
     }
+
     setLoading(true);
-    setNickname(nickname.trim());
+    setMessage("");
+
+    const result = await setNickname(nickname.trim());
+
+    if (!result.ok) {
+      setLoading(false);
+      setError(true);
+      setMessage(result.message || nicknameError || "Não foi possível reservar esse apelido.");
+      setTimeout(() => setError(false), 500);
+      return;
+    }
+
     setTimeout(() => {
-      navigate('/trail');
-    }, 800);
+      navigate("/trail");
+    }, 500);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleEnter();
+    if (e.key === "Enter") handleEnter();
   };
 
   return (
@@ -42,7 +56,12 @@ function Entry() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#136e00]/5 rounded-full border-2 border-dashed border-[#136e00]/20"></div>
           {/* Central icon */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#136e00] rounded-full flex items-center justify-center shadow-lg">
-            <span className="material-symbols-outlined text-white text-[48px]" style={{ fontVariationSettings: "'FILL' 1" }}>map</span>
+            <span
+              className="material-symbols-outlined text-white text-[48px]"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              map
+            </span>
           </div>
         </div>
       </div>
@@ -50,9 +69,12 @@ function Entry() {
       {/* Content Area */}
       <div className="w-full max-w-md text-center space-y-8 z-10">
         <div className="space-y-3">
-          <h2 className="font-headline text-[40px] leading-[48px] tracking-tight font-extrabold text-[#151e12]">Explore o Caminho</h2>
+          <h2 className="font-headline text-[40px] leading-[48px] tracking-tight font-extrabold text-[#151e12]">
+            Explore o Caminho
+          </h2>
           <p className="font-body text-[16px] leading-[24px] text-[#3d4b37] max-w-[300px] mx-auto">
-            Aprenda sobre direitos e causas sociais de forma leve e interativa. Sua jornada começa aqui.
+            Aprenda sobre direitos e causas sociais de forma leve e interativa. Sua jornada começa
+            aqui.
           </p>
         </div>
 
@@ -70,7 +92,7 @@ function Entry() {
               onKeyDown={handleKeyDown}
               placeholder="Como quer ser chamado?"
               className={`w-full h-14 bg-[#f3fde9] border-2 rounded-xl px-4 font-body text-[16px] leading-[24px] text-[#151e12] focus:outline-none focus:border-[#136e00] focus:ring-0 transition-colors placeholder:text-[#6d7b65] ${
-                error ? 'border-[#ba1a1a] animate-shake' : 'border-[#bccbb2]'
+                error ? "border-[#ba1a1a] animate-shake" : "border-[#bccbb2]"
               }`}
             />
           </div>
@@ -81,7 +103,9 @@ function Entry() {
           >
             {loading ? (
               <>
-                <span className="material-symbols-outlined animate-spin-slow">progress_activity</span>
+                <span className="material-symbols-outlined animate-spin-slow">
+                  progress_activity
+                </span>
                 <span>Carregando...</span>
               </>
             ) : (
@@ -91,8 +115,10 @@ function Entry() {
               </>
             )}
           </button>
-          <p className="font-body text-[16px] leading-[24px] text-[#6d7b65] text-sm">
-            Não é necessário senha para começar.
+          <p
+            className={`font-body text-[16px] leading-[24px] text-sm ${message ? "text-[#ba1a1a]" : "text-[#6d7b65]"}`}
+          >
+            {message || "Não é necessário senha para começar."}
           </p>
         </div>
       </div>

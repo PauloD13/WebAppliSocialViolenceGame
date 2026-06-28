@@ -170,7 +170,9 @@ function Conclusion() {
           </div>
           <div className="bg-[#e7f1dd] p-3 rounded-lg border border-dashed border-[#136e00] flex items-center gap-2">
             <span className="material-symbols-outlined text-[#136e00]">location_on</span>
-            <span className="text-sm font-semibold text-[#3d4b37]">Balcão Central • Ala Norte</span>
+            <span className="text-sm font-semibold text-[#3d4b37]">
+              Procure um representante do 3° DS
+            </span>
           </div>
         </section>
 

@@ -8,15 +8,15 @@ export const aboutContent = {
   equipe: [
     {
       nome: "Paulo Demeris",
-      cargo: "Tech Lead",
+      cargo: "Líder Técnico",
       imagem: "https://avatars.githubusercontent.com/u/94316828?v=4&size=64",
     },
-    { nome: "João Felipe", cargo: "Lead Designer", imagem: "" },
-    { nome: "Artur Costa", cargo: "Front-end Developer", imagem: "" },
-    { nome: "Cristiano Oliveira", cargo: "Front-end Developer", imagem: "" },
+    { nome: "João Felipe", cargo: "Designer Principal", imagem: "" },
+    { nome: "Artur Costa", cargo: "Desenvolvedor Front-end", imagem: "" },
+    { nome: "Cristiano Oliveira", cargo: "Desenvolvedor Front-end", imagem: "" },
     {
       nome: "João Gabriel Quaresma, Ester Felix, Maria Eduarda Sousa",
-      cargo: "Documentation and Content Writers",
+      cargo: "Redatores de Documentação e Conteúdo",
       imagem: "",
     },
   ],

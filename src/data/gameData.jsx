@@ -646,25 +646,25 @@ export const contextData = {
     modulo: "Módulo 01",
     icone: "warning",
     destaque:
-      "Bullying isn't just 'part of growing up.' It can lead to long-term emotional scars and isolation, especially in the digital age.",
+      'O bullying não é apenas "parte do crescimento". Ele pode levar a cicatrizes emocionais de longo prazo e ao isolamento, especialmente na era digital.',
     porQue:
-      "Understanding the scale of the challenge is the first step toward building a safer community. Harassment often follows students home through their devices.",
+      "Compreender a dimensão do desafio é o primeiro passo para construir uma comunidade mais segura. O assédio frequentemente acompanha os alunos até em casa por meio de seus dispositivos.",
     stats: [
-      { valor: "37%", label: "Youth affected" },
-      { valor: "24/7", label: "Cyber exposure" },
+      { valor: "37%", label: "Jovens afetados" },
+      { valor: "24/7", label: "Exposição Cibernética" },
     ],
     cards: [
       {
         icone: "school",
-        titulo: "In Person Bullying",
+        titulo: "Bullying Presencial",
         texto:
-          "Physical and verbal classroom interactions that create an intimidating environment for students.",
+          "Interações físicas e verbais em sala de aula que criam um ambiente intimidador para os alunos.",
       },
       {
         icone: "devices",
         titulo: "Cyberbullying",
         texto:
-          "Persistent harassment via social media, apps, or messaging that often hides in plain sight.",
+          "Assédio persistente através de mídias sociais, aplicativos ou mensagens que muitas vezes se esconde à vista de todos.",
       },
     ],
   },
@@ -817,27 +817,27 @@ export const aboutContent = {
   equipe: [
     {
       nome: "Paulo Demeris",
-      cargo: "Tech Lead",
+      cargo: "Líder Técnico",
       imagem: "",
     },
     {
       nome: "João Felipe",
-      cargo: "Lead Designer",
+      cargo: "Designer Principal",
       imagem: "",
     },
     {
       nome: "Artur Costa",
-      cargo: "Front-end Developer",
+      cargo: "Desenvolvedor Front-end",
       imagem: "",
     },
     {
       nome: "Cristiano Oliveira",
-      cargo: "Front-end Developer",
+      cargo: "Desenvolvedor Front-end",
       imagem: "",
     },
     {
       nome: "João Gabriel Quaresma, Ester Felix, Maria Eduarda Sousa",
-      cargo: "Documentation and Content Writers",
+      cargo: "Redatores de Documentação e Conteúdo",
       imagem: "",
     },
   ],

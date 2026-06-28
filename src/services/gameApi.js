@@ -129,6 +129,15 @@ export const registerUser = async (nome, senha) => {
     if (err.status === 400) {
       return { ok: false, message: "Esse nome de usuário já está em uso." };
     }
+    
+    // O POST /auth/registro tem um bug na API original onde retorna 500 (ou outro erro)
+    // devido a um mismatch de response_model, mas o usuário é criado com sucesso no banco.
+    // Tentamos fazer login como fallback para verificar se a conta foi realmente criada.
+    const fallbackLogin = await loginUser(nome, senha);
+    if (fallbackLogin.ok) {
+      return fallbackLogin;
+    }
+
     return { ok: false, message: "Não foi possível criar a conta. Tente novamente." };
   }
 

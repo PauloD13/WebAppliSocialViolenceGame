@@ -4,18 +4,17 @@
  */
 
 export const STORAGE_KEYS = {
-  user:      "awareness_user",      // dados da conta logada {id, nome, nivel, acerto_total, erro_total}
-  unlocked:  "awareness_unlocked",  // [categoryId, ...] categorias desbloqueadas nesta sessão
+  user: "awareness_user", // dados da conta logada {id, nome, nivel, acerto_total, erro_total}
+  unlocked: "awareness_unlocked", // [categoryId, ...] categorias desbloqueadas nesta sessão
   completed: "awareness_completed", // [categoryId, ...] categorias concluídas nesta sessão
-  pool:      "awareness_pool",      // {categoryId: [questionId, ...]} pool restante
-  attempts:  "awareness_attempts",  // {categoryId: number} tentativas por categoria
-  errors:    "awareness_errors",    // {categoryId: number} erros por categoria
-  history:   "awareness_history",   // [...] histórico de trilhas completadas
-  score:     "awareness_score",     // number pontuação da sessão atual (5 pts / acerto)
+  pool: "awareness_pool", // {categoryId: [questionId, ...]} pool restante
+  attempts: "awareness_attempts", // {categoryId: number} tentativas por categoria
+  errors: "awareness_errors", // {categoryId: number} erros por categoria
+  history: "awareness_history", // [...] histórico de trilhas completadas
+  score: "awareness_score", // number pontuação da sessão atual (5 pts / acerto)
 };
 
-const isBrowser = () =>
-  typeof window !== "undefined" && typeof document !== "undefined";
+const isBrowser = () => typeof window !== "undefined" && typeof document !== "undefined";
 
 // ---------------------------------------------------------------------------
 // localStorage

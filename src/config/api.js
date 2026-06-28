@@ -23,12 +23,12 @@ export const API_TIMEOUT_MS = Number(getEnv("VITE_API_TIMEOUT_MS", "6000")) || 6
 export const API_ENDPOINTS = {
   // Conteúdo do jogo
   categories: "/categories",
-  questions:  "/questions",
+  questions: "/questions",
 
   // Autenticação
-  login:    "/auth/login",
+  login: "/auth/login",
   register: "/auth/registro",
-  myData:   "/auth/meus-dados",
+  myData: "/auth/meus-dados",
 
   // Progresso
   updateProgress: (userId) => `/usuario/update/${userId}`,

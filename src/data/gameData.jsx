@@ -818,32 +818,27 @@ export const aboutContent = {
     {
       nome: "Paulo Demeris",
       cargo: "Tech Lead",
-      imagem:
-        "",
+      imagem: "",
     },
     {
       nome: "João Felipe",
       cargo: "Lead Designer",
-      imagem:
-        "",
+      imagem: "",
     },
     {
       nome: "Artur Costa",
       cargo: "Front-end Developer",
-      imagem:
-        "",
+      imagem: "",
     },
     {
       nome: "Cristiano Oliveira",
       cargo: "Front-end Developer",
-      imagem:
-        "",
+      imagem: "",
     },
     {
       nome: "João Gabriel Quaresma, Ester Felix, Maria Eduarda Sousa",
       cargo: "Documentation and Content Writers",
-      imagem:
-        "",
+      imagem: "",
     },
   ],
 };

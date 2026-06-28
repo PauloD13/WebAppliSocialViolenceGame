@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useGame } from "../hooks/useGame.js";
+import { useGame } from "../hooks/useGame.jsx";
 
 function Feedback() {
   const { categoryId } = useParams();

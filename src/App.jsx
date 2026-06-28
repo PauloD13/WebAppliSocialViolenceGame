@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { GameProvider } from "./context/GameProvider.jsx";
+import { GameProvider } from "./hooks/useGame.jsx";
 import Entry from "./pages/Entry.jsx";
 import Trail from "./pages/Trail.jsx";
 import Context from "./pages/Context.jsx";

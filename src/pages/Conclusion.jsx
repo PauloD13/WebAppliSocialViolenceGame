@@ -8,19 +8,18 @@ function Conclusion() {
   const stats = getCategoryStats();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const totalAttempts   = stats.reduce((sum, s) => sum + (s.attempts || 0), 0);
-  const totalErrors     = stats.reduce((sum, s) => sum + (s.errors   || 0), 0);
-  const completedCount  = stats.filter((s) => s.completed).length;
+  const totalAttempts = stats.reduce((sum, s) => sum + (s.attempts || 0), 0);
+  const totalErrors = stats.reduce((sum, s) => sum + (s.errors || 0), 0);
+  const completedCount = stats.filter((s) => s.completed).length;
   const totalCategories = stats.length || 1;
-  const accuracy        = totalAttempts > 0
-    ? Math.round(((totalAttempts - totalErrors) / totalAttempts) * 100)
-    : 100;
+  const accuracy =
+    totalAttempts > 0 ? Math.round(((totalAttempts - totalErrors) / totalAttempts) * 100) : 100;
 
-  const circumference  = 2 * Math.PI * 56;        // ≈ 351.86
-  const dashOffset     = circumference * (1 - completedCount / totalCategories);
+  const circumference = 2 * Math.PI * 56; // ≈ 351.86
+  const dashOffset = circumference * (1 - completedCount / totalCategories);
 
   const handleReiniciar = () => setShowConfirm(true);
-  const confirmReset    = () => {
+  const confirmReset = () => {
     resetTrail();
     setShowConfirm(false);
     navigate("/trail");
@@ -29,7 +28,6 @@ function Conclusion() {
   return (
     <div className="min-h-screen bg-[#f3fde9] text-[#151e12] font-body flex flex-col pb-32 overflow-x-hidden">
       <main className="flex-1 pt-20 pb-8 px-6 flex flex-col items-center max-w-lg mx-auto w-full relative">
-
         {/* Celebration header */}
         <section className="text-center mt-4 mb-8 z-20">
           <div className="relative inline-block mb-4">
@@ -55,7 +53,6 @@ function Conclusion() {
 
         {/* Stats grid */}
         <section className="w-full grid grid-cols-2 gap-4 mb-8 z-20">
-
           {/* Progress circle */}
           <div className="col-span-2 bg-white p-6 rounded-xl border-2 border-[#bccbb2] shadow-sm flex flex-col items-center">
             <span className="text-[#3d4b37] font-headline text-[12px] font-bold uppercase mb-4">
@@ -64,13 +61,21 @@ function Conclusion() {
             <div className="relative w-32 h-32 mb-2">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
-                  cx="64" cy="64" r="56" fill="transparent"
-                  stroke="currentColor" strokeWidth="12"
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  fill="transparent"
+                  stroke="currentColor"
+                  strokeWidth="12"
                   className="text-[#e7f1dd]"
                 />
                 <circle
-                  cx="64" cy="64" r="56" fill="transparent"
-                  stroke="currentColor" strokeWidth="12"
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  fill="transparent"
+                  stroke="currentColor"
+                  strokeWidth="12"
                   strokeDasharray={circumference.toFixed(2)}
                   strokeDashoffset={dashOffset.toFixed(2)}
                   className="text-[#58CC02] transition-all duration-1000"
@@ -200,7 +205,8 @@ function Conclusion() {
               Reiniciar Trilha?
             </h3>
             <p className="text-[#3d4b37] font-body text-[16px] leading-[24px] mb-8">
-              Seu progresso local será reiniciado. Sua pontuação acumulada no banco de dados fica preservada.
+              Seu progresso local será reiniciado. Sua pontuação acumulada no banco de dados fica
+              preservada.
             </p>
             <div className="flex gap-3">
               <button

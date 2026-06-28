@@ -10,11 +10,11 @@ function Trail() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const nodePositions = [
-    { x: 0,   y: 0   },
+    { x: 0, y: 0 },
     { x: -40, y: 180 },
-    { x: 30,  y: 360 },
+    { x: 30, y: 360 },
     { x: -30, y: 540 },
-    { x: 20,  y: 720 },
+    { x: 20, y: 720 },
     { x: -10, y: 900 },
   ];
 
@@ -25,7 +25,7 @@ function Trail() {
   };
 
   const handleResponder = (catId) => navigate(`/question/${catId}`);
-  const handleContexto  = (catId) => navigate(`/context/${catId}`);
+  const handleContexto = (catId) => navigate(`/context/${catId}`);
 
   const handleLogout = () => {
     logoutUser();
@@ -69,8 +69,8 @@ function Trail() {
 
         {/* Nodes */}
         {stats.map((cat, index) => {
-          const pos         = nodePositions[index] || { x: 0, y: index * 180 };
-          const isUnlocked  = cat.unlocked;
+          const pos = nodePositions[index] || { x: 0, y: index * 180 };
+          const isUnlocked = cat.unlocked;
           const isCompleted = cat.completed;
 
           return (
@@ -78,28 +78,40 @@ function Trail() {
               key={cat.id}
               className="relative z-10 flex flex-col items-center"
               style={{
-                transform:    `translateX(${pos.x}px)`,
+                transform: `translateX(${pos.x}px)`,
                 marginBottom: index < stats.length - 1 ? "128px" : "0",
-                marginTop:    index === 0 ? "20px" : "0",
+                marginTop: index === 0 ? "20px" : "0",
               }}
             >
               {/* Tooltip */}
               {isUnlocked && activeTooltip === cat.id && (
                 <div className="bg-white rounded-xl shadow-lg p-2 flex gap-2 mb-4 tooltip-arrow relative animate-fade-in-up">
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleResponder(cat.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleResponder(cat.id);
+                    }}
                     className="bg-[#136e00] text-white font-headline text-[12px] font-bold tracking-wider uppercase px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#136e00]/80 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    <span
+                      className="material-symbols-outlined text-[20px]"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
                       edit_square
                     </span>
                     Responder
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleContexto(cat.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContexto(cat.id);
+                    }}
                     className="bg-[#e7f1dd] text-[#3d4b37] font-headline text-[12px] font-bold tracking-wider uppercase px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#e1ebd8] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    <span
+                      className="material-symbols-outlined text-[20px]"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
                       menu_book
                     </span>
                     Contexto
@@ -144,7 +156,9 @@ function Trail() {
                     </span>
                   </div>
                   <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow border border-[#bccbb2]">
-                    <span className="material-symbols-outlined text-[16px] text-[#AFAFAF]">lock</span>
+                    <span className="material-symbols-outlined text-[16px] text-[#AFAFAF]">
+                      lock
+                    </span>
                   </div>
                 </div>
               )}

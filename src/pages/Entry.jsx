@@ -6,7 +6,16 @@ import { useGame } from "../hooks/useGame.jsx";
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function InputField({ label, id, type = "text", value, onChange, onKeyDown, hasError, placeholder }) {
+function InputField({
+  label,
+  id,
+  type = "text",
+  value,
+  onChange,
+  onKeyDown,
+  hasError,
+  placeholder,
+}) {
   return (
     <div className="relative group">
       <label
@@ -40,7 +49,7 @@ function Entry() {
   const { user, loginUser, registerUser, authError, authLoading } = useGame();
 
   const [mode, setMode] = useState("login"); // "login" | "register"
-  const [nome, setNome]   = useState("");
+  const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
   const [fieldError, setFieldError] = useState(false);
   const [localMessage, setLocalMessage] = useState("");
@@ -76,7 +85,7 @@ function Entry() {
     }
 
     clearError();
-    const fn     = mode === "login" ? loginUser : registerUser;
+    const fn = mode === "login" ? loginUser : registerUser;
     const result = await fn(nome.trim(), senha);
 
     if (!result.ok) {
@@ -188,7 +197,8 @@ function Entry() {
               displayMessage ? "text-[#ba1a1a]" : "text-[#6d7b65]"
             }`}
           >
-            {displayMessage || (isLogin ? "Acesso seguro com senha." : "Seus dados ficam salvos no banco.")}
+            {displayMessage ||
+              (isLogin ? "Acesso seguro com senha." : "Seus dados ficam salvos no banco.")}
           </p>
 
           {/* Toggle login/register */}

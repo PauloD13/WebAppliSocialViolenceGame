@@ -32,14 +32,10 @@ const request = async (path, options = {}) => {
     });
 
     const contentType = response.headers.get("content-type") || "";
-    const payload = contentType.includes("application/json")
-      ? await response.json()
-      : null;
+    const payload = contentType.includes("application/json") ? await response.json() : null;
 
     if (!response.ok) {
-      const err = new Error(
-        payload?.detail || payload?.message || `HTTP ${response.status}`,
-      );
+      const err = new Error(payload?.detail || payload?.message || `HTTP ${response.status}`);
       err.status = response.status;
       err.payload = payload;
       throw err;
@@ -200,8 +196,7 @@ const pickCollection = (payload, keys) => {
 const normalizeCategory = (category, index) => {
   const id = Number(category.id ?? category.categoria_id ?? index + 1);
   const order = Number(category.ordem ?? category.order ?? id);
-  const fallback =
-    localCategories.find((c) => c.id === id) || localCategories[index] || {};
+  const fallback = localCategories.find((c) => c.id === id) || localCategories[index] || {};
 
   return {
     ...fallback,
@@ -225,12 +220,7 @@ const normalizeQuestion = (question, index) => {
   return {
     ...question,
     id: question.id ?? index + 1,
-    categoria_id: Number(
-      question.categoria_id ??
-      question.categoria ??
-      question.category_id ??
-      1,
-    ),
+    categoria_id: Number(question.categoria_id ?? question.categoria ?? question.category_id ?? 1),
     numero: question.numero ?? `${index + 1}`,
     tipo_pergunta: question.tipo_pergunta ?? "Pergunta",
     texto: question.texto ?? question.text ?? question.pergunta ?? "",
@@ -241,18 +231,14 @@ const normalizeQuestion = (question, index) => {
           normalizeAlternative({ letra, texto }, i),
         ),
     resposta_correta:
-      question.resposta_correta ??
-      question.resposta ??
-      question.correct_answer ??
-      question.answer,
-    feedback_acerto:
-      question.feedback_acerto ?? question.feedback ?? "",
+      question.resposta_correta ?? question.resposta ?? question.correct_answer ?? question.answer,
+    feedback_acerto: question.feedback_acerto ?? question.feedback ?? "",
   };
 };
 
 export const getFallbackContent = () => ({
   categories: localCategories,
-  questions:  localQuestions,
+  questions: localQuestions,
   source: "local",
   error: null,
 });

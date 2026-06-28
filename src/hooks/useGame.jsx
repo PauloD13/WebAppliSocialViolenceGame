@@ -13,7 +13,7 @@ import {
 } from "../data/gameData.jsx";
 import {
   loadGameContent,
-  loginUser  as apiLogin,
+  loginUser as apiLogin,
   registerUser as apiRegister,
   saveProgress,
   saveRegistro,
@@ -37,9 +37,7 @@ const POINTS_PER_CORRECT = 5;
 // ---------------------------------------------------------------------------
 
 const getCategoryQuestionIds = (questionList, categoryId) =>
-  questionList
-    .filter((q) => Number(q.categoria_id) === Number(categoryId))
-    .map((q) => q.id);
+  questionList.filter((q) => Number(q.categoria_id) === Number(categoryId)).map((q) => q.id);
 
 const getNextCategoryId = (categoryList, categoryId) => {
   const ordered = [...categoryList].sort((a, b) => a.ordem - b.ordem);
@@ -47,8 +45,7 @@ const getNextCategoryId = (categoryList, categoryId) => {
   return idx >= 0 ? ordered[idx + 1]?.id : undefined;
 };
 
-const getInitialUser = () =>
-  readJsonStorage(STORAGE_KEYS.user, null);
+const getInitialUser = () => readJsonStorage(STORAGE_KEYS.user, null);
 
 // ---------------------------------------------------------------------------
 // Context
@@ -63,9 +60,9 @@ const GameContext = createContext();
 export function GameProvider({ children }) {
   // ------ Content ------
   const [categories, setCategories] = useState(fallbackCategories);
-  const [questions, setQuestions]   = useState(fallbackQuestions);
+  const [questions, setQuestions] = useState(fallbackQuestions);
   const [contentStatus, setContentStatus] = useState("loading");
-  const [contentError, setContentError]   = useState(null);
+  const [contentError, setContentError] = useState(null);
 
   // ------ Auth ------
   const [user, setUser] = useState(getInitialUser);
@@ -79,39 +76,29 @@ export function GameProvider({ children }) {
   const [completedCategories, setCompletedCategories] = useState(() =>
     readJsonStorage(STORAGE_KEYS.completed, []),
   );
-  const [currentPool, setCurrentPool] = useState(() =>
-    readJsonStorage(STORAGE_KEYS.pool, {}),
-  );
-  const [attempts, setAttempts] = useState(() =>
-    readJsonStorage(STORAGE_KEYS.attempts, {}),
-  );
-  const [errors, setErrors] = useState(() =>
-    readJsonStorage(STORAGE_KEYS.errors, {}),
-  );
-  const [history, setHistory] = useState(() =>
-    readJsonStorage(STORAGE_KEYS.history, []),
-  );
+  const [currentPool, setCurrentPool] = useState(() => readJsonStorage(STORAGE_KEYS.pool, {}));
+  const [attempts, setAttempts] = useState(() => readJsonStorage(STORAGE_KEYS.attempts, {}));
+  const [errors, setErrors] = useState(() => readJsonStorage(STORAGE_KEYS.errors, {}));
+  const [history, setHistory] = useState(() => readJsonStorage(STORAGE_KEYS.history, []));
 
   // score = pontuação acumulada nesta sessão (5 pts / acerto)
-  const [score, setScore] = useState(
-    () => Number(readJsonStorage(STORAGE_KEYS.score, 0)) || 0,
-  );
+  const [score, setScore] = useState(() => Number(readJsonStorage(STORAGE_KEYS.score, 0)) || 0);
 
   // ------ Question state ------
-  const [currentQuestion, setCurrentQuestion]   = useState(null);
-  const [selectedOption, setSelectedOption]     = useState(null);
-  const [showError, setShowError]               = useState(false);
-  const [errorMessage, setErrorMessage]         = useState("");
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Ref para acerto_total e erro_total acumulados no banco
   // Usamos ref para evitar deps desnecessárias no submitAnswer
   const dbAcertoRef = useRef(user?.acerto_total ?? 0);
-  const dbErroRef   = useRef(user?.erro_total   ?? 0);
+  const dbErroRef = useRef(user?.erro_total ?? 0);
 
   // Sincroniza refs quando o user muda (login/logout)
   useEffect(() => {
     dbAcertoRef.current = user?.acerto_total ?? 0;
-    dbErroRef.current   = user?.erro_total   ?? 0;
+    dbErroRef.current = user?.erro_total ?? 0;
   }, [user]);
 
   // ---------------------------------------------------------------------------
@@ -133,73 +120,79 @@ export function GameProvider({ children }) {
       setContentStatus(content.source);
       setContentError(content.error?.message ?? null);
     });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Reinicia categorias desbloqueadas se os IDs mudaram (API reload)
   useEffect(() => {
     if (!categories.length) return;
-    const valid = unlockedCategories.some((id) =>
-      categories.some((c) => c.id === id),
-    );
+    const valid = unlockedCategories.some((id) => categories.some((c) => c.id === id));
     if (!valid) {
       const next = [categories[0].id];
       setUnlockedCategories(next);
       save(STORAGE_KEYS.unlocked, next);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories]);
 
   // ---------------------------------------------------------------------------
   // Auth — login
   // ---------------------------------------------------------------------------
 
-  const loginUserFn = useCallback(async (nome, senha) => {
-    setAuthError("");
-    setAuthLoading(true);
+  const loginUserFn = useCallback(
+    async (nome, senha) => {
+      setAuthError("");
+      setAuthLoading(true);
 
-    const result = await apiLogin(nome.trim(), senha);
+      const result = await apiLogin(nome.trim(), senha);
 
-    setAuthLoading(false);
+      setAuthLoading(false);
 
-    if (!result.ok) {
-      setAuthError(result.message);
-      return result;
-    }
+      if (!result.ok) {
+        setAuthError(result.message);
+        return result;
+      }
 
-    setUser(result.user);
-    // Sincroniza contadores do banco com os refs
-    dbAcertoRef.current = result.user.acerto_total ?? 0;
-    dbErroRef.current   = result.user.erro_total   ?? 0;
-    save(STORAGE_KEYS.user, result.user);
+      setUser(result.user);
+      // Sincroniza contadores do banco com os refs
+      dbAcertoRef.current = result.user.acerto_total ?? 0;
+      dbErroRef.current = result.user.erro_total ?? 0;
+      save(STORAGE_KEYS.user, result.user);
 
-    return { ok: true };
-  }, [save]);
+      return { ok: true };
+    },
+    [save],
+  );
 
   // ---------------------------------------------------------------------------
   // Auth — register
   // ---------------------------------------------------------------------------
 
-  const registerUserFn = useCallback(async (nome, senha) => {
-    setAuthError("");
-    setAuthLoading(true);
+  const registerUserFn = useCallback(
+    async (nome, senha) => {
+      setAuthError("");
+      setAuthLoading(true);
 
-    const result = await apiRegister(nome.trim(), senha);
+      const result = await apiRegister(nome.trim(), senha);
 
-    setAuthLoading(false);
+      setAuthLoading(false);
 
-    if (!result.ok) {
-      setAuthError(result.message);
-      return result;
-    }
+      if (!result.ok) {
+        setAuthError(result.message);
+        return result;
+      }
 
-    setUser(result.user);
-    dbAcertoRef.current = result.user.acerto_total ?? 0;
-    dbErroRef.current   = result.user.erro_total   ?? 0;
-    save(STORAGE_KEYS.user, result.user);
+      setUser(result.user);
+      dbAcertoRef.current = result.user.acerto_total ?? 0;
+      dbErroRef.current = result.user.erro_total ?? 0;
+      save(STORAGE_KEYS.user, result.user);
 
-    return { ok: true };
-  }, [save]);
+      return { ok: true };
+    },
+    [save],
+  );
 
   // ---------------------------------------------------------------------------
   // Auth — logout
@@ -209,7 +202,7 @@ export function GameProvider({ children }) {
     setUser(null);
     setAuthError("");
     dbAcertoRef.current = 0;
-    dbErroRef.current   = 0;
+    dbErroRef.current = 0;
 
     // Limpa TUDO do localStorage (progresso + conta)
     clearAllStorage();
@@ -234,11 +227,9 @@ export function GameProvider({ children }) {
 
   const getPoolForCategory = useCallback(
     (categoryId) => {
-      const allIds  = getCategoryQuestionIds(questions, categoryId);
-      const saved   = currentPool[categoryId];
-      const valid   = Array.isArray(saved)
-        ? saved.filter((id) => allIds.includes(id))
-        : [];
+      const allIds = getCategoryQuestionIds(questions, categoryId);
+      const saved = currentPool[categoryId];
+      const valid = Array.isArray(saved) ? saved.filter((id) => allIds.includes(id)) : [];
       return valid.length > 0 ? valid : allIds;
     },
     [currentPool, questions],
@@ -269,7 +260,9 @@ export function GameProvider({ children }) {
   // Ref estável para drawQuestion — evita que Question.jsx faça re-draw
   // quando apenas o pool muda (ex: após resposta errada)
   const drawQuestionRef = useRef(drawQuestionFn);
-  useEffect(() => { drawQuestionRef.current = drawQuestionFn; });
+  useEffect(() => {
+    drawQuestionRef.current = drawQuestionFn;
+  });
 
   const drawQuestion = useCallback((categoryId) => {
     drawQuestionRef.current(categoryId);
@@ -301,15 +294,15 @@ export function GameProvider({ children }) {
       if (isCorrect) {
         const alreadyCompleted = completedCategories.includes(Number(categoryId));
 
-        const nextCompleted  = [...new Set([...completedCategories, Number(categoryId)])];
+        const nextCompleted = [...new Set([...completedCategories, Number(categoryId)])];
         const nextCategoryId = getNextCategoryId(categories, categoryId);
-        const nextUnlocked   = nextCategoryId
+        const nextUnlocked = nextCategoryId
           ? [...new Set([...unlockedCategories, nextCategoryId])]
           : unlockedCategories;
 
         // 5 pts por acerto, mas apenas uma vez por categoria
         const earnedPoints = alreadyCompleted ? 0 : POINTS_PER_CORRECT;
-        const nextScore    = score + earnedPoints;
+        const nextScore = score + earnedPoints;
 
         const nextPool = { ...currentPool };
         delete nextPool[categoryId];
@@ -330,7 +323,7 @@ export function GameProvider({ children }) {
         if (!alreadyCompleted && user?.id) {
           dbAcertoRef.current += 1;
           const currentAcerto = dbAcertoRef.current;
-          const currentErro   = dbErroRef.current;
+          const currentErro = dbErroRef.current;
 
           saveProgress(user.id, currentAcerto, currentErro);
           saveRegistro(user.id, categoryId);
@@ -344,10 +337,10 @@ export function GameProvider({ children }) {
       }
 
       // ------ ERRO ------
-      const pool       = getPoolForCategory(categoryId);
-      const remaining  = pool.filter((id) => String(id) !== String(questionId));
-      const resetPool  = getCategoryQuestionIds(questions, categoryId);
-      const nextPool   = {
+      const pool = getPoolForCategory(categoryId);
+      const remaining = pool.filter((id) => String(id) !== String(questionId));
+      const resetPool = getCategoryQuestionIds(questions, categoryId);
+      const nextPool = {
         ...currentPool,
         [categoryId]: remaining.length === 0 ? resetPool : remaining,
       };
@@ -370,9 +363,17 @@ export function GameProvider({ children }) {
       return { correct: false };
     },
     [
-      attempts, categories, completedCategories, currentPool,
-      errors, getPoolForCategory, questions, save, score,
-      unlockedCategories, user,
+      attempts,
+      categories,
+      completedCategories,
+      currentPool,
+      errors,
+      getPoolForCategory,
+      questions,
+      save,
+      score,
+      unlockedCategories,
+      user,
     ],
   );
 
@@ -387,7 +388,7 @@ export function GameProvider({ children }) {
         date: new Date().toISOString(),
         nome: user?.nome,
         attempts: { ...attempts },
-        errors:   { ...errors },
+        errors: { ...errors },
         score,
       };
       const nextHistory = [...history, entry];
@@ -413,10 +414,7 @@ export function GameProvider({ children }) {
     save(STORAGE_KEYS.attempts, {});
     save(STORAGE_KEYS.errors, {});
     save(STORAGE_KEYS.score, 0);
-  }, [
-    attempts, categories, completedCategories,
-    errors, history, save, score, user,
-  ]);
+  }, [attempts, categories, completedCategories, errors, history, save, score, user]);
 
   // ---------------------------------------------------------------------------
   // Derived
@@ -427,17 +425,16 @@ export function GameProvider({ children }) {
     [categories, completedCategories],
   );
 
-  const isTrailComplete =
-    categories.length > 0 && completedCount === categories.length;
+  const isTrailComplete = categories.length > 0 && completedCount === categories.length;
 
   const getCategoryStats = useCallback(
     () =>
       categories.map((cat) => ({
         ...cat,
-        unlocked:  unlockedCategories.includes(cat.id),
+        unlocked: unlockedCategories.includes(cat.id),
         completed: completedCategories.includes(cat.id),
-        attempts:  attempts[cat.id]  || 0,
-        errors:    errors[cat.id]    || 0,
+        attempts: attempts[cat.id] || 0,
+        errors: errors[cat.id] || 0,
       })),
     [attempts, categories, completedCategories, errors, unlockedCategories],
   );
@@ -451,7 +448,7 @@ export function GameProvider({ children }) {
     user,
     authError,
     authLoading,
-    loginUser:    loginUserFn,
+    loginUser: loginUserFn,
     registerUser: registerUserFn,
     logoutUser,
 

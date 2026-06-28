@@ -1,5 +1,5 @@
 import React from "react";
-import { aboutContent } from "../data/gameData.jsx";
+import { aboutContent } from "../data/aboutContent.js";
 
 function About() {
   const content = aboutContent;

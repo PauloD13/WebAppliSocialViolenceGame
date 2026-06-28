@@ -1,0 +1,19 @@
+/** Conteúdo estático da tela "Sobre o Projeto". */
+export const aboutContent = {
+  titulo: "Lumina Awareness",
+  subtitulo: "SOBRE O PROJETO",
+  descricao: "Transformamos dados e realidades sociais em jornadas de conhecimento e empatia.",
+  missao:
+    "O Lumina Awareness nasceu com a convicção de que a informação é a ferramenta mais poderosa para a mudança social. Nossa missão é democratizar o acesso a temas complexos como direitos humanos, combate ao racismo e sustentabilidade através de uma interface gamificada e acolhedora.",
+  equipe: [
+    { nome: "Paulo Demeris", cargo: "Tech Lead", imagem: "" },
+    { nome: "João Felipe", cargo: "Lead Designer", imagem: "" },
+    { nome: "Artur Costa", cargo: "Front-end Developer", imagem: "" },
+    { nome: "Cristiano Oliveira", cargo: "Front-end Developer", imagem: "" },
+    {
+      nome: "João Gabriel Quaresma, Ester Felix, Maria Eduarda Sousa",
+      cargo: "Documentation and Content Writers",
+      imagem: "",
+    },
+  ],
+};

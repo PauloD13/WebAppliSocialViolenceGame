@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { contextData } from "../data/gameData.jsx";
-import { useGame } from "../hooks/useGame.jsx";
+import { contextData } from "../data/contextData.js";
+import { useGame } from "../hooks/useGame.js";
 
 function Context() {
   const { categoryId } = useParams();

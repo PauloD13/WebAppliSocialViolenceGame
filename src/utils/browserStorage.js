@@ -1,3 +1,8 @@
+/**
+ * Utilitários de persistência local.
+ * Abstrai localStorage e cookies com serialização JSON segura.
+ */
+
 export const STORAGE_KEYS = {
   user: "awareness_user",
   session: "awareness_session",
@@ -14,9 +19,12 @@ export const STORAGE_KEYS = {
 
 const isBrowser = () => typeof window !== "undefined" && typeof document !== "undefined";
 
+// ---------------------------------------------------------------------------
+// localStorage
+// ---------------------------------------------------------------------------
+
 export const readJsonStorage = (key, fallback) => {
   if (!isBrowser()) return fallback;
-
   try {
     const raw = window.localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -27,7 +35,11 @@ export const readJsonStorage = (key, fallback) => {
 
 export const writeJsonStorage = (key, value) => {
   if (!isBrowser()) return;
-  window.localStorage.setItem(key, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // QuotaExceededError — ignora silenciosamente
+  }
 };
 
 export const removeStorage = (key) => {
@@ -35,17 +47,18 @@ export const removeStorage = (key) => {
   window.localStorage.removeItem(key);
 };
 
+// ---------------------------------------------------------------------------
+// Cookies
+// ---------------------------------------------------------------------------
+
 export const readJsonCookie = (key, fallback) => {
   if (!isBrowser()) return fallback;
-
-  const cookie = document.cookie
+  const entry = document.cookie
     .split("; ")
     .find((row) => row.startsWith(`${encodeURIComponent(key)}=`));
-
-  if (!cookie) return fallback;
-
+  if (!entry) return fallback;
   try {
-    const value = cookie.split("=").slice(1).join("=");
+    const value = entry.split("=").slice(1).join("=");
     return JSON.parse(decodeURIComponent(value));
   } catch {
     return fallback;
@@ -54,7 +67,6 @@ export const readJsonCookie = (key, fallback) => {
 
 export const writeJsonCookie = (key, value, maxAgeSeconds) => {
   if (!isBrowser()) return;
-
   document.cookie = [
     `${encodeURIComponent(key)}=${encodeURIComponent(JSON.stringify(value))}`,
     `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`,
@@ -68,12 +80,17 @@ export const removeCookie = (key) => {
   document.cookie = `${encodeURIComponent(key)}=; Max-Age=0; Path=/; SameSite=Lax`;
 };
 
-export const createClientId = () => {
-  const existingClientId = readJsonStorage(STORAGE_KEYS.clientId, null);
-  if (existingClientId) return existingClientId;
+// ---------------------------------------------------------------------------
+// Client ID (gerado uma única vez por dispositivo)
+// ---------------------------------------------------------------------------
 
-  const nextClientId =
+export const createClientId = () => {
+  const existing = readJsonStorage(STORAGE_KEYS.clientId, null);
+  if (existing) return existing;
+
+  const next =
     globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  writeJsonStorage(STORAGE_KEYS.clientId, nextClientId);
-  return nextClientId;
+
+  writeJsonStorage(STORAGE_KEYS.clientId, next);
+  return next;
 };

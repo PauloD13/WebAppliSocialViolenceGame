@@ -1,18 +1,29 @@
 import { WS_URL } from "../config/api.js";
 
+// ---------------------------------------------------------------------------
+// Normalizer
+// ---------------------------------------------------------------------------
+
+const normalizeEntry = (item, index) => ({
+  id: item.id ?? item.userId ?? item.playerId ?? item.nickname ?? index,
+  nickname: item.nickname ?? item.name ?? "Jogador",
+  score: Number(item.score ?? item.points ?? item.pontos ?? 0),
+  completedCategories: Number(item.completedCategories ?? item.completed ?? 0),
+  updatedAt: item.updatedAt ?? item.date ?? new Date().toISOString(),
+});
+
 const normalizeRanking = (items = []) =>
-  items
-    .map((item, index) => ({
-      id: item.id ?? item.userId ?? item.playerId ?? item.nickname ?? index,
-      nickname: item.nickname ?? item.name ?? "Jogador",
-      score: Number(item.score ?? item.points ?? item.pontos ?? 0),
-      completedCategories: Number(item.completedCategories ?? item.completed ?? 0),
-      updatedAt: item.updatedAt ?? item.date ?? new Date().toISOString(),
-    }))
+  [...items]
+    .map(normalizeEntry)
     .sort((a, b) => b.score - a.score)
     .slice(0, 10);
 
-const getRankingFromMessage = (message) => {
+// ---------------------------------------------------------------------------
+// Message parser
+// ---------------------------------------------------------------------------
+
+const extractRanking = (message) => {
+  // Suporta: array direto, {ranking:[...]}, {data:[...]}, {type, ranking:[...]}
   if (Array.isArray(message)) return message;
   if (Array.isArray(message?.ranking)) return message.ranking;
   if (Array.isArray(message?.data)) return message.data;
@@ -20,13 +31,23 @@ const getRankingFromMessage = (message) => {
   return null;
 };
 
+// ---------------------------------------------------------------------------
+// Connection factory
+// ---------------------------------------------------------------------------
+
+/**
+ * Abre e gerencia a conexão WebSocket com o servidor de ranking.
+ *
+ * @param {object} options
+ * @param {{ id: string, nickname: string }} options.user
+ * @param {(ranking: object[]) => void} options.onRanking
+ * @param {(status: "connecting"|"connected"|"offline") => void} options.onStatus
+ * @returns {{ sendScore: (payload: object) => void, close: () => void }}
+ */
 export const createRankingConnection = ({ user, onRanking, onStatus }) => {
   if (!WS_URL || typeof WebSocket === "undefined") {
     onStatus?.("offline");
-    return {
-      sendScore: () => {},
-      close: () => {},
-    };
+    return { sendScore: () => {}, close: () => {} };
   }
 
   let socket;
@@ -46,19 +67,17 @@ export const createRankingConnection = ({ user, onRanking, onStatus }) => {
     socket.addEventListener("open", () => {
       reconnectAttempts = 0;
       onStatus?.("connected");
-      send("player:join", {
-        userId: user.id,
-        nickname: user.nickname,
-      });
+      // Apresenta o jogador ao servidor para registro no mapa de conexões
+      send("player:join", { userId: user.id, nickname: user.nickname });
     });
 
     socket.addEventListener("message", (event) => {
       try {
         const message = JSON.parse(event.data);
-        const ranking = getRankingFromMessage(message);
-        if (ranking) onRanking?.(normalizeRanking(ranking));
+        const rawRanking = extractRanking(message);
+        if (rawRanking) onRanking?.(normalizeRanking(rawRanking));
       } catch {
-        // Mensagens não JSON são ignoradas para manter o canal resiliente.
+        // Mensagens malformadas são ignoradas
       }
     });
 
@@ -66,8 +85,9 @@ export const createRankingConnection = ({ user, onRanking, onStatus }) => {
       onStatus?.("offline");
       if (closedByClient) return;
 
+      // Backoff exponencial: 1s → 2s → 4s → ... → 10s (máx)
       reconnectAttempts += 1;
-      const delay = Math.min(10000, 1000 * 2 ** reconnectAttempts);
+      const delay = Math.min(10_000, 1_000 * 2 ** reconnectAttempts);
       reconnectTimer = setTimeout(connect, delay);
     });
 
@@ -88,9 +108,18 @@ export const createRankingConnection = ({ user, onRanking, onStatus }) => {
   };
 };
 
+// ---------------------------------------------------------------------------
+// Ranking merge utility
+// ---------------------------------------------------------------------------
+
+/**
+ * Insere ou atualiza uma entrada no ranking local (sem re-ordenar todo o array).
+ * Útil para atualizar o estado React otimisticamente antes da confirmação do servidor.
+ */
 export const mergeRankingEntry = (ranking, entry) => {
-  const withoutCurrent = ranking.filter(
-    (item) => item.id !== entry.id && item.nickname !== entry.nickname,
+  const normalized = normalizeEntry(entry, 0);
+  const without = ranking.filter(
+    (item) => item.id !== normalized.id && item.nickname !== normalized.nickname,
   );
-  return normalizeRanking([entry, ...withoutCurrent]);
+  return normalizeRanking([normalized, ...without]);
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { learnMoreContent } from "../data/gameData.jsx";
+import { learnMoreContent } from "../data/learnMoreContent.js";
 
 function LearnMore() {
   const content = learnMoreContent;

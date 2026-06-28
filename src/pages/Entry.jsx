@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGame } from "../hooks/useGame.jsx";
+import { useGame } from "../hooks/useGame.js";
 
 function Entry() {
   const navigate = useNavigate();

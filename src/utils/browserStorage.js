@@ -1,23 +1,21 @@
 /**
- * Utilitários de persistência local.
- * Abstrai localStorage e cookies com serialização JSON segura.
+ * Utilitários de persistência em localStorage.
+ * Cookies e clientId foram removidos — a autenticação agora é por conta (nome + senha).
  */
 
 export const STORAGE_KEYS = {
-  user: "awareness_user",
-  session: "awareness_session",
-  clientId: "awareness_client_id",
-  unlocked: "awareness_unlocked",
-  completed: "awareness_completed",
-  pool: "awareness_pool",
-  attempts: "awareness_attempts",
-  errors: "awareness_errors",
-  history: "awareness_history",
-  score: "awareness_score",
-  ranking: "awareness_ranking",
+  user:      "awareness_user",      // dados da conta logada {id, nome, nivel, acerto_total, erro_total}
+  unlocked:  "awareness_unlocked",  // [categoryId, ...] categorias desbloqueadas nesta sessão
+  completed: "awareness_completed", // [categoryId, ...] categorias concluídas nesta sessão
+  pool:      "awareness_pool",      // {categoryId: [questionId, ...]} pool restante
+  attempts:  "awareness_attempts",  // {categoryId: number} tentativas por categoria
+  errors:    "awareness_errors",    // {categoryId: number} erros por categoria
+  history:   "awareness_history",   // [...] histórico de trilhas completadas
+  score:     "awareness_score",     // number pontuação da sessão atual (5 pts / acerto)
 };
 
-const isBrowser = () => typeof window !== "undefined" && typeof document !== "undefined";
+const isBrowser = () =>
+  typeof window !== "undefined" && typeof document !== "undefined";
 
 // ---------------------------------------------------------------------------
 // localStorage
@@ -47,50 +45,7 @@ export const removeStorage = (key) => {
   window.localStorage.removeItem(key);
 };
 
-// ---------------------------------------------------------------------------
-// Cookies
-// ---------------------------------------------------------------------------
-
-export const readJsonCookie = (key, fallback) => {
-  if (!isBrowser()) return fallback;
-  const entry = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${encodeURIComponent(key)}=`));
-  if (!entry) return fallback;
-  try {
-    const value = entry.split("=").slice(1).join("=");
-    return JSON.parse(decodeURIComponent(value));
-  } catch {
-    return fallback;
-  }
-};
-
-export const writeJsonCookie = (key, value, maxAgeSeconds) => {
-  if (!isBrowser()) return;
-  document.cookie = [
-    `${encodeURIComponent(key)}=${encodeURIComponent(JSON.stringify(value))}`,
-    `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`,
-    "Path=/",
-    "SameSite=Lax",
-  ].join("; ");
-};
-
-export const removeCookie = (key) => {
-  if (!isBrowser()) return;
-  document.cookie = `${encodeURIComponent(key)}=; Max-Age=0; Path=/; SameSite=Lax`;
-};
-
-// ---------------------------------------------------------------------------
-// Client ID (gerado uma única vez por dispositivo)
-// ---------------------------------------------------------------------------
-
-export const createClientId = () => {
-  const existing = readJsonStorage(STORAGE_KEYS.clientId, null);
-  if (existing) return existing;
-
-  const next =
-    globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-  writeJsonStorage(STORAGE_KEYS.clientId, next);
-  return next;
+/** Remove todas as chaves de progresso e autenticação do localStorage. */
+export const clearAllStorage = () => {
+  Object.values(STORAGE_KEYS).forEach(removeStorage);
 };

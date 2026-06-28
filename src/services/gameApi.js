@@ -1,6 +1,5 @@
 import { API_BASE_URL, API_ENDPOINTS, API_TIMEOUT_MS } from "../config/api.js";
-import { categories as localCategories } from "../data/categories.js";
-import { questions as localQuestions } from "../data/questions.js";
+import { categories as localCategories, questions as localQuestions } from "../data/gameData.jsx";
 
 const hasRemoteApi = Boolean(API_BASE_URL);
 
@@ -8,24 +7,39 @@ const hasRemoteApi = Boolean(API_BASE_URL);
 // HTTP client
 // ---------------------------------------------------------------------------
 
+/**
+ * Faz uma requisição REST para a API.
+ * @param {string} path
+ * @param {RequestInit & { authNome?: string }} options
+ *   authNome → quando informado, adiciona o header `nome` exigido pela API.
+ */
 const request = async (path, options = {}) => {
-  if (!hasRemoteApi) throw new Error("API base URL não configurada.");
+  if (!hasRemoteApi) throw new Error("VITE_API_BASE_URL não configurado.");
 
+  const { authNome, ...fetchOptions } = options;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
+      ...fetchOptions,
       signal: controller.signal,
-      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      headers: {
+        "Content-Type": "application/json",
+        ...(authNome ? { nome: authNome } : {}),
+        ...(fetchOptions.headers || {}),
+      },
     });
 
     const contentType = response.headers.get("content-type") || "";
-    const payload = contentType.includes("application/json") ? await response.json() : null;
+    const payload = contentType.includes("application/json")
+      ? await response.json()
+      : null;
 
     if (!response.ok) {
-      const err = new Error(payload?.detail || payload?.message || "Falha ao comunicar com a API.");
+      const err = new Error(
+        payload?.detail || payload?.message || `HTTP ${response.status}`,
+      );
       err.status = response.status;
       err.payload = payload;
       throw err;
@@ -38,7 +52,140 @@ const request = async (path, options = {}) => {
 };
 
 // ---------------------------------------------------------------------------
-// Collection extractor (handles array, {data:[...]}, {items:[...]}, etc.)
+// Auth
+// ---------------------------------------------------------------------------
+
+/**
+ * Autentica o usuário e retorna seus dados completos.
+ *
+ * Fluxo da API:
+ *   1. POST /auth/login  — verifica credenciais (retorna apenas {mensagem})
+ *   2. GET  /auth/meus-dados (Header: nome) — retorna {id, nome, nivel, acerto_total, erro_total}
+ *
+ * Nota: o serviço /auth/login tem um bug conhecido onde qualquer exceção
+ * interna retorna 500 ao invés de 401/404. Tratamos todos os erros como
+ * "credenciais inválidas" para não expor detalhes ao usuário.
+ *
+ * @returns {{ ok: true, user: object } | { ok: false, message: string }}
+ */
+export const loginUser = async (nome, senha) => {
+  if (!hasRemoteApi) {
+    // Modo offline: aceita qualquer nome/senha para desenvolvimento local
+    return {
+      ok: true,
+      user: { id: 1, nome, nivel: 0, acerto_total: 0, erro_total: 0 },
+    };
+  }
+
+  try {
+    // Passo 1: verificar credenciais
+    await request(API_ENDPOINTS.login, {
+      method: "POST",
+      body: JSON.stringify({ nome, senha }),
+    });
+
+    // Passo 2: buscar dados completos do usuário
+    const userData = await request(API_ENDPOINTS.myData, { authNome: nome });
+
+    return {
+      ok: true,
+      user: {
+        id: userData.id,
+        nome: userData.nome ?? nome,
+        nivel: userData.nivel ?? 0,
+        acerto_total: userData.acerto_total ?? 0,
+        erro_total: userData.erro_total ?? 0,
+      },
+    };
+  } catch (err) {
+    // 404 = usuário não encontrado, 401 = senha errada, 500 = bug da API (mesma causa)
+    return {
+      ok: false,
+      message: "Nome de usuário ou senha incorretos.",
+    };
+  }
+};
+
+/**
+ * Cria uma nova conta e em seguida autentica automaticamente.
+ *
+ * Nota: POST /auth/registro tem um mismatch de response_model na API original,
+ * mas o usuário é criado no banco independentemente disso. Por isso fazemos
+ * o login logo após o registro para obter os dados reais.
+ *
+ * @returns {{ ok: true, user: object } | { ok: false, message: string }}
+ */
+export const registerUser = async (nome, senha) => {
+  if (!hasRemoteApi) {
+    return {
+      ok: true,
+      user: { id: Date.now(), nome, nivel: 0, acerto_total: 0, erro_total: 0 },
+    };
+  }
+
+  try {
+    await request(API_ENDPOINTS.register, {
+      method: "POST",
+      body: JSON.stringify({ nome, senha }),
+    });
+  } catch (err) {
+    // 400 = nome já em uso
+    if (err.status === 400) {
+      return { ok: false, message: "Esse nome de usuário já está em uso." };
+    }
+    return { ok: false, message: "Não foi possível criar a conta. Tente novamente." };
+  }
+
+  // Auto-login após registro bem-sucedido
+  return loginUser(nome, senha);
+};
+
+// ---------------------------------------------------------------------------
+// Progress saving
+// ---------------------------------------------------------------------------
+
+/**
+ * Salva o progresso acumulado do usuário no banco.
+ * Chamado após cada resposta (correta ou incorreta).
+ * Falha silenciosa — o progresso local não é afetado se a API estiver fora.
+ */
+export const saveProgress = async (userId, acertoTotal, erroTotal) => {
+  if (!hasRemoteApi || !userId) return;
+
+  try {
+    await request(API_ENDPOINTS.updateProgress(userId), {
+      method: "PUT",
+      body: JSON.stringify({ acerto_total: acertoTotal, erro_total: erroTotal }),
+    });
+  } catch (err) {
+    console.warn("[gameApi] Falha ao salvar progresso no banco:", err?.message);
+  }
+};
+
+/**
+ * Registra a conclusão de uma categoria para o usuário.
+ * Cria um registro na tabela Registro com acerto_categoria = 1.
+ * Falha silenciosa.
+ */
+export const saveRegistro = async (userId, categoriaId) => {
+  if (!hasRemoteApi || !userId || !categoriaId) return;
+
+  try {
+    await request(API_ENDPOINTS.createRegistro, {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: userId,
+        categoria_id: categoriaId,
+        acerto_categoria: 1,
+      }),
+    });
+  } catch (err) {
+    console.warn("[gameApi] Falha ao registrar categoria concluída:", err?.message);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Game content (categorias + perguntas)
 // ---------------------------------------------------------------------------
 
 const pickCollection = (payload, keys) => {
@@ -50,213 +197,93 @@ const pickCollection = (payload, keys) => {
   return [];
 };
 
-// ---------------------------------------------------------------------------
-// Normalizers
-// ---------------------------------------------------------------------------
-
-/**
- * Normaliza uma categoria da API (apenas {id, nome}) com os dados visuais locais.
- * O banco fornece o conteúdo; o frontend fornece cor, ícone e classes CSS.
- */
 const normalizeCategory = (category, index) => {
-  const id = Number(category.id ?? category.categoria_id ?? category.categoryId ?? index + 1);
-  const order = Number(category.ordem ?? category.order ?? category.position ?? id);
-  const fallback = localCategories.find((item) => item.id === id) || localCategories[index] || {};
+  const id = Number(category.id ?? category.categoria_id ?? index + 1);
+  const order = Number(category.ordem ?? category.order ?? id);
+  const fallback =
+    localCategories.find((c) => c.id === id) || localCategories[index] || {};
 
   return {
-    ...fallback, // spread visual data first (lowest priority)
-    ...category, // API data overwrites where keys match
+    ...fallback,
+    ...category,
     id,
     ordem: order,
-    nome: category.nome ?? category.name ?? category.title ?? fallback.nome,
-    cor: category.cor ?? category.color ?? fallback.cor,
+    nome: category.nome ?? category.name ?? fallback.nome,
+    cor: category.cor ?? fallback.cor,
     icon: category.icon ?? category.icone ?? fallback.icon,
   };
 };
 
-/**
- * Normaliza alternativas: aceita array [{letra, texto}] ou dict {"A": "texto"}.
- */
-const normalizeAlternatives = (alternativas) => {
-  if (!alternativas) return [];
-
-  // Formato array (preferido): [{letra: "A", texto: "..."}, ...]
-  if (Array.isArray(alternativas)) {
-    return alternativas.map((alt, index) => ({
-      letra: alt.letra ?? alt.letter ?? alt.key ?? String.fromCharCode(65 + index),
-      texto: alt.texto ?? alt.text ?? alt.label ?? alt.description ?? "",
-    }));
-  }
-
-  // Formato dict: {"A": "texto A", "B": "texto B"}
-  if (typeof alternativas === "object") {
-    return Object.entries(alternativas).map(([letra, value]) => ({
-      letra,
-      texto: typeof value === "string" ? value : (value?.texto ?? value?.text ?? ""),
-    }));
-  }
-
-  return [];
-};
-
-/**
- * Normaliza uma pergunta da API para o formato interno do frontend.
- *
- * API field → Frontend field:
- *   pergunta  → texto
- *   resposta  → resposta_correta
- *   feedback  → feedback_acerto
- *   categoria → categoria_id  (campo legado antes da correção do schema)
- */
-const normalizeQuestion = (question, index) => ({
-  ...question,
-  id: question.id ?? question.questionId ?? question.uuid ?? index + 1,
-
-  categoria_id: Number(
-    question.categoria_id ??
-      question.categoria ?? // campo legado da API (antes da correção do schema)
-      question.category_id ??
-      question.categoryId ??
-      question.category?.id ??
-      1,
-  ),
-
-  numero: question.numero ?? question.number ?? question.code ?? `${index + 1}`,
-
-  tipo_pergunta: question.tipo_pergunta ?? question.type ?? question.kind ?? "Pergunta",
-
-  // API devolve "pergunta", frontend usa "texto"
-  texto:
-    question.texto ??
-    question.text ??
-    question.pergunta ?? // campo da API
-    question.statement ??
-    question.title ??
-    "",
-
-  dica: question.dica ?? question.hint ?? question.tip ?? "",
-
-  alternativas: normalizeAlternatives(
-    question.alternativas ?? question.options ?? question.answers,
-  ),
-
-  // API devolve "resposta", frontend usa "resposta_correta"
-  resposta_correta:
-    question.resposta_correta ??
-    question.correct_answer ??
-    question.correctAnswer ??
-    question.resposta ?? // campo da API
-    question.answer ??
-    question.answerKey,
-
-  // "feedback" é o campo da API; "feedback_acerto" é o campo interno
-  feedback_acerto:
-    question.feedback_acerto ??
-    question.success_feedback ??
-    question.successFeedback ??
-    question.feedback ?? // campo da API
-    "",
+const normalizeAlternative = (alt, index) => ({
+  ...alt,
+  letra: alt.letra ?? alt.letter ?? String.fromCharCode(65 + index),
+  texto: alt.texto ?? alt.text ?? alt.label ?? "",
 });
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
+const normalizeQuestion = (question, index) => {
+  const alternativas = question.alternativas ?? question.options ?? question.answers ?? [];
+  return {
+    ...question,
+    id: question.id ?? index + 1,
+    categoria_id: Number(
+      question.categoria_id ??
+      question.categoria ??
+      question.category_id ??
+      1,
+    ),
+    numero: question.numero ?? `${index + 1}`,
+    tipo_pergunta: question.tipo_pergunta ?? "Pergunta",
+    texto: question.texto ?? question.text ?? question.pergunta ?? "",
+    dica: question.dica ?? question.hint ?? "",
+    alternativas: Array.isArray(alternativas)
+      ? alternativas.map(normalizeAlternative)
+      : Object.entries(alternativas).map(([letra, texto], i) =>
+          normalizeAlternative({ letra, texto }, i),
+        ),
+    resposta_correta:
+      question.resposta_correta ??
+      question.resposta ??
+      question.correct_answer ??
+      question.answer,
+    feedback_acerto:
+      question.feedback_acerto ?? question.feedback ?? "",
+  };
+};
 
 export const getFallbackContent = () => ({
   categories: localCategories,
-  questions: localQuestions,
+  questions:  localQuestions,
   source: "local",
   error: null,
 });
 
 /**
- * Carrega categorias e perguntas da API.
- * Em caso de falha (API offline, dados vazios) retorna os dados locais.
+ * Carrega categorias e perguntas da API com fallback para dados locais.
  */
 export const loadGameContent = async () => {
   if (!hasRemoteApi) return getFallbackContent();
 
   try {
-    const [categoriesPayload, questionsPayload] = await Promise.all([
+    const [catPayload, qPayload] = await Promise.all([
       request(API_ENDPOINTS.categories),
       request(API_ENDPOINTS.questions),
     ]);
 
-    const categories = pickCollection(categoriesPayload, ["categories", "categorias"])
+    const categories = pickCollection(catPayload, ["categories", "categorias"])
       .map(normalizeCategory)
       .sort((a, b) => a.ordem - b.ordem);
 
-    const questions = pickCollection(questionsPayload, ["questions", "perguntas"])
+    const questions = pickCollection(qPayload, ["questions", "perguntas"])
       .map(normalizeQuestion)
       .filter((q) => q.texto && q.alternativas.length > 0);
 
-    if (categories.length === 0 || questions.length === 0) {
-      throw new Error("A API retornou categorias ou perguntas vazias.");
+    if (!categories.length || !questions.length) {
+      throw new Error("API retornou dados vazios.");
     }
 
     return { categories, questions, source: "api", error: null };
-  } catch (error) {
-    console.warn("[gameApi] API indisponível — usando dados locais.", error?.message);
-    return { ...getFallbackContent(), source: "fallback", error };
-  }
-};
-
-/**
- * Reserva um nickname no backend (sessionless — sem senha).
- * Retorna { ok: true, user } ou { ok: false, reason, message }.
- */
-export const reserveNickname = async ({ nickname, clientId, expiresAt }) => {
-  const localUser = { id: clientId, clientId, nickname, expiresAt, source: "local" };
-
-  if (!hasRemoteApi) return { ok: true, user: localUser };
-
-  try {
-    const payload = await request(API_ENDPOINTS.playerSession, {
-      method: "POST",
-      body: JSON.stringify({ nickname, clientId, expiresAt }),
-    });
-
-    return {
-      ok: true,
-      user: {
-        ...localUser,
-        id: payload?.id ?? clientId,
-        nickname: payload?.nickname ?? nickname,
-        clientId: payload?.clientId ?? clientId,
-        expiresAt: payload?.expiresAt ?? expiresAt,
-        source: "api",
-      },
-    };
-  } catch (error) {
-    if (error.status === 409) {
-      return {
-        ok: false,
-        reason: "nickname_in_use",
-        message: error.payload?.detail || "Esse apelido já está em uso. Tente outro.",
-      };
-    }
-
-    // API offline — permite jogar localmente
-    console.warn("[gameApi] Sessão remota indisponível; seguindo offline.", error?.message);
-    return { ok: true, user: { ...localUser, source: "offline" } };
-  }
-};
-
-/**
- * Envia a pontuação final para a API REST (complementar ao WebSocket).
- * Falha silenciosa — o WebSocket é a fonte primária de ranking.
- */
-export const submitScore = async (scorePayload) => {
-  if (!hasRemoteApi) return { ok: false, reason: "api_not_configured" };
-
-  try {
-    await request(API_ENDPOINTS.score, {
-      method: "POST",
-      body: JSON.stringify(scorePayload),
-    });
-    return { ok: true };
-  } catch (error) {
-    console.warn("[gameApi] Não foi possível sincronizar pontuação REST.", error?.message);
-    return { ok: false, reason: "sync_failed" };
+  } catch (err) {
+    console.warn("[gameApi] Usando dados locais:", err?.message);
+    return { ...getFallbackContent(), source: "fallback", error: err };
   }
 };
